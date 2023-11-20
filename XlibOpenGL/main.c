@@ -17,7 +17,6 @@ int main (){
 		return 1;
 	}
 
-	printf("assinging window");
 	Window root = DefaultRootWindow(display);
 	XVisualInfo *Visual_Info = glXChooseVisual(display, 0, NULL);
 	XSetWindowAttributes set_win_attr;
@@ -26,19 +25,30 @@ int main (){
 	Window window = XCreateWindow(display, root, 0, 0, 800, 600, 0 ,
 			       Visual_Info->depth, InputOutput, Visual_Info->visual,
 			       CWBorderPixel | CWColormap, &set_win_attr);
-	printf("Showing window..");
 	XMapWindow(display, window);
 	XStoreName(display, window, "Open GL Rendering");
 
-	printf("Creating context..");
-
 	GLXContext glx_context = glXCreateContext(display, Visual_Info, NULL, GL_TRUE);
+	GLenum error = glGetError();	
+	if (error != GL_NO_ERROR) {
+		fprintf(stderr, "OpenGL error: %d\n", error);
+		return 1;
+	}
 	glXMakeCurrent(display,window,glx_context);
+	error = glGetError();
+	if (error != GL_NO_ERROR) {
+		fprintf(stderr, "OpenGL error: %d\n", error);
+		return 1;
+	}
 	glEnable(GL_DEPTH_TEST);
+	error = glGetError();
+	if (error != GL_NO_ERROR) {
+		fprintf(stderr, "OpenGL error: %d\n", error);
+		return 1;
+	}	
 	XSelectInput(display, window, ExposureMask | KeyPressMask);
 	init_gl();
 
-	printf("Handling events");
 	XEvent event;
 	while(1)
 	{
@@ -57,25 +67,38 @@ int main (){
 }
 
 void init_gl(){
-	printf("Init gl..");
 	glMatrixMode(GL_PROJECTION);
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+	    fprintf(stderr, "OpenGL error: %d\n", error);
+	}
 	gluPerspective(45.0, 1.0, 1.0, 100.0);
 	glMatrixMode(GL_MODELVIEW);
+	error = glGetError();
+	if (error != GL_NO_ERROR) {
+	    fprintf(stderr, "OpenGL error: %d\n", error);
+	}
 	gluLookAt(0.0,0.0,5.0,0.0,0.0,0.0,0.0,1.0,0.0);
+	
 }
 
 void handle_expose(Display *display, Window window){
-	printf("painting..");
-	glXMakeCurrent(display, window, glXCreateContext(display, 0, NULL, GL_TRUE));
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+	    fprintf(stderr, "OpenGL error: %d\n", error);
+	}
 	draw_cube();
 	glXSwapBuffers(display, window);
 }
 
 void draw_cube(){
-	printf("Drawing..");
 	glBegin(GL_QUADS);
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+	    fprintf(stderr, "OpenGL error: %d\n", error);
+	}
 	glColor3f(1.0,0.0,0.0);
 	glVertex3f(-1.0, -1.0, -1.0);
 	glVertex3f(1.0, -1.0, -1.0);
